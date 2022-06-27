@@ -1,20 +1,62 @@
-import memes from "../memesdata";
+import { useState, useEffect } from 'react';
 
 export default function Meme() {
+  const [meme, setMeme] = useState({
+    topText: '',
+    bottomText: '',
+    imgUrl: 'https://i.imgflip.com/26hg.jpg',
+  });
+  const [memesData, setMemesData] = useState([]);
 
-    function getMemeImage(e){
-        e.preventDefault();
-        let rand = Math.floor(Math.random() * 100);
-        console.log(memes['data']['memes'][rand]['url']);
-    }
+  useEffect(() => {
+    fetch('https://api.imgflip.com/get_memes')
+      .then((res) => res.json())
+      .then((memesData) => setMemesData(memesData.data.memes));
+  }, []);
 
-    return (
-        <main>
-            <form className="form">
-                <input type="text" className="form--input" placeholder="Top Text"/>
-                <input type="text"className="form--input" placeholder="Bottom Text"/>
-                <button className="form--button" onClick={getMemeImage}>Get a new meme image 🍍</button>
-            </form>
-        </main>
-    );
+  function getMemeUrl() {
+    setMeme((prevMeme) => ({
+      ...prevMeme,
+      imgUrl: memesData[Math.floor(Math.random() * memesData.length) + 1].url,
+    }));
+  }
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setMeme((prevMeme) => ({
+      ...prevMeme,
+      [name]: value,
+    }));
+  }
+
+  return (
+    <main>
+      <form className='meme-form'>
+        <input
+          type='text'
+          name='topText'
+          id='topText'
+          placeholder='Shut up'
+          value={meme.topText}
+          onChange={handleChange}
+        />
+        <input
+          type='text'
+          name='bottomText'
+          id='bottomText'
+          placeholder='and take my money'
+          value={meme.bottomText}
+          onChange={handleChange}
+        />
+        <button type='button' onClick={getMemeUrl} id='submitBtn'>
+          Get a new meme🌄
+        </button>
+      </form>
+      <div className='imageContainer'>
+        <img className='meme-img' src={meme.imgUrl} alt='Funny meme' />
+        <h2 className='meme-text top'>{meme.topText}</h2>
+        <h2 className='meme-text bottom'>{meme.bottomText}</h2>
+      </div>
+    </main>
+  );
 }
